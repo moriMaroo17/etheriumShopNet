@@ -71,7 +71,7 @@ contract Accounts {
         _;
     }
 
-    constructor () {
+    constructor () public {
         admins[msg.sender] = Admin('Max', 'Max');
         role_per_address[msg.sender] = roles[5];
     }
