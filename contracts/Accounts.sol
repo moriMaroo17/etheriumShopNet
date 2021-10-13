@@ -32,7 +32,7 @@ contract Accounts {
         string name;
         string city;
         address[] shop_sellers;
-        uint32 rate;
+        uint16 rate;
     }
 
     struct Provider {
@@ -55,12 +55,6 @@ contract Accounts {
         string login;
         string name;
     }
-
-    // struct Comment {
-    //     address owner;
-    //     uint128 likes;
-    //     uint128 dislikes;
-    // }
 
     modifier onlyRole(string memory _role) {
         require(
@@ -88,7 +82,7 @@ contract Accounts {
         );
         role_per_address[_user_address] = "Seller";
         shops[_shop_address].shop_sellers.push(_user_address);
-        delete customers[_user_address];
+        // delete customers[_user_address];
         delete asks_for_change[_user_address];
     }
 
