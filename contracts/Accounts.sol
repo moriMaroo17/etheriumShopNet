@@ -134,23 +134,6 @@ contract Accounts {
         auth_data[_login] = keccak256(abi.encode(_password));
     }
 
-    // function switch_state(string memory _current_state)
-    //     public
-    //     onlyRole(roles[5])
-    // {
-    //     if (
-    //         keccak256(abi.encode(_current_state)) ==
-    //         keccak256(abi.encode(roles[5]))
-    //     ) {
-    //         customers[msg.sender] = Customer(
-    //             admins[msg.sender].login,
-    //             admins[msg.sender].name
-    //         );
-    //     } else {
-    //         delete customers[msg.sender];
-    //     }
-    // }
-
     function removeShop(address _shop_address) public onlyRole(roles[5]) {
         Shop memory removing_shop = shops[_shop_address];
         for (uint24 i = 0; i < removing_shop.shop_sellers.length; i++) {
