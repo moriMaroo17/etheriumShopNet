@@ -47,16 +47,16 @@ contract Accounts {
     }
 
     mapping(address => string) public role_per_address;
-    mapping(string => bytes32) private auth_data;
+    mapping(string => bytes32) public auth_data;
 
     mapping(address => string) asks_for_change;
 
-    mapping(address => Bank) banks;
-    mapping(address => Shop) shops;
-    mapping(address => Provider) providers;
-    mapping(address => Seller) sellers;
-    mapping(address => Customer) customers;
-    mapping(address => Admin) admins;
+    mapping(address => Bank) public banks;
+    mapping(address => Shop) public shops;
+    mapping(address => Provider) public providers;
+    mapping(address => Seller) public sellers;
+    mapping(address => Customer) public customers;
+    mapping(address => Admin) public admins;
 
     constructor() {
         admins[msg.sender] = Admin('max', 'max');
