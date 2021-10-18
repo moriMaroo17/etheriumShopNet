@@ -49,7 +49,8 @@ contract Accounts {
     mapping(address => string) public role_per_address;
     mapping(string => bytes32) public auth_data;
 
-    mapping(address => string) asks_for_change;
+    mapping(address => address) public asks_for_up;
+    mapping(address => string) public asks_for_down;
 
     mapping(address => Bank) public banks;
     mapping(address => Shop) public shops;
@@ -72,21 +73,39 @@ contract Accounts {
         );
         _;
     }
+    // test func. will be remove on deploy
+    function check_shop_seller(address _shop_address, address _seller_address) external view returns (bool) {
+        for (uint i = 0; i < shops[_shop_address].shop_sellers.length; i++) {
+            if (shops[_shop_address].shop_sellers[i] == _seller_address) {
+                return true;
+            }
+        }
+        return false;
+    }
+    // test func. will be remove on deploy
+    function get_shop_seller(address _shop_address, address _seller_address) external view returns (address) {
+        for (uint i = 0; i < shops[_shop_address].shop_sellers.length; i++) {
+            if (shops[_shop_address].shop_sellers[i] == _seller_address) {
+                return shops[_shop_address].shop_sellers[i];
+            }
+        }
+    }
 
-    function up_role(address _user_address, address _shop_address)
+    function up_role(address _user_address)
         public
         onlyRole(roles[5])
     {
+        address shop_address = asks_for_up[_user_address];
         sellers[_user_address] = Seller(
             customers[_user_address].login,
             customers[_user_address].name,
-            shops[_shop_address].city,
-            _shop_address
+            shops[shop_address].city,
+            shop_address
         );
         role_per_address[_user_address] = roles[3];
-        shops[_shop_address].shop_sellers.push(_user_address);
+        shops[shop_address].shop_sellers.push(_user_address);
         // delete customers[_user_address];
-        delete asks_for_change[_user_address];
+        delete asks_for_up[_user_address];
     }
 
     function down_role(address _user_address) public onlyRole(roles[5]) {
@@ -94,9 +113,18 @@ contract Accounts {
             sellers[_user_address].login,
             sellers[_user_address].name
         );
+        address[] storage shop_sellers = shops[sellers[_user_address].shop_address].shop_sellers;
+        for (uint24 i = 0; i < shop_sellers.length; i++) {
+            if (shop_sellers[i] == _user_address) {
+                delete shop_sellers[i];
+                shop_sellers[i] = shop_sellers[shop_sellers.length-1];
+                delete shop_sellers[shop_sellers.length-1];
+                break;
+            } 
+        }
         role_per_address[_user_address] = roles[4];
         delete sellers[_user_address];
-        delete asks_for_change[_user_address];
+        delete asks_for_down[_user_address];
     }
 
     function add_shop(
@@ -134,19 +162,20 @@ contract Accounts {
         auth_data[_login] = keccak256(abi.encode(_password));
     }
 
-    function removeShop(address _shop_address) public onlyRole(roles[5]) {
-        Shop memory removing_shop = shops[_shop_address];
-        for (uint24 i = 0; i < removing_shop.shop_sellers.length; i++) {
-            down_role(removing_shop.shop_sellers[i]);
+    function remove_shop(address _shop_address) public onlyRole(roles[5]) {
+        // Shop memory removing_shop = shops[_shop_address];
+        for (uint24 i = 0; i < shops[_shop_address].shop_sellers.length; i++) {
+            down_role(shops[_shop_address].shop_sellers[i]);
         }
-        delete removing_shop;
+        delete role_per_address[_shop_address];
+        delete shops[_shop_address];
     }
 
-    function ask_for_up() public onlyRole(roles[4]) {
-        asks_for_change[msg.sender] = "up";
+    function ask_for_up(address _shop_address) public onlyRole(roles[4]) {
+        asks_for_up[msg.sender] = _shop_address;
     }
 
     function ask_for_down() public onlyRole(roles[3]) {
-        asks_for_change[msg.sender] = "down";
+        asks_for_down[msg.sender] = "down";
     }
 }
