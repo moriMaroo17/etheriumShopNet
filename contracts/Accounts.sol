@@ -3,15 +3,26 @@ pragma solidity >=0.4.22 <0.9.0;
 
 contract Accounts {
 
-    string[7] roles = [
-        "Bank",
-        "Shop",
-        "Provider",
-        "Seller",
-        "Customer",
-        "Admin",
-        "Guest"
-    ];
+    enum Role {
+        Bank,
+        Shop,
+        Provider,
+        Seller,
+        Customer,
+        Admin,
+        Guest
+    }
+
+    // used for tests
+    // string[7] roles = [
+    //     "Bank",
+    //     "Shop",
+    //     "Provider",
+    //     "Seller",
+    //     "Customer",
+    //     "Admin",
+    //     "Guest"
+    // ];
 
     struct Bank {
         string name;
@@ -23,6 +34,7 @@ contract Accounts {
         string city;
         address[] shop_sellers;
         uint16 rate;
+        uint using_reviews;
     }
 
     struct Provider {
@@ -46,7 +58,7 @@ contract Accounts {
         string name;
     }
 
-    mapping(address => string) public role_per_address;
+    mapping(address => Role) public role_per_address;
     mapping(string => bytes32) public auth_data;
 
     mapping(address => address) public asks_for_up;
@@ -62,13 +74,12 @@ contract Accounts {
     constructor() {
         admins[msg.sender] = Admin('max', 'max');
         customers[msg.sender] = Customer('max', 'max');
-        role_per_address[msg.sender] = roles[5];
+        role_per_address[msg.sender] = Role.Admin;
     }
 
-    modifier onlyRole(string memory _role) {
+    modifier onlyRole(Role _role) {
         require(
-            keccak256(abi.encode(role_per_address[msg.sender])) ==
-                keccak256(abi.encode(_role)),
+            role_per_address[msg.sender] == _role,
             "Permisson denied."
         );
         _;
@@ -93,7 +104,7 @@ contract Accounts {
 
     function up_role(address _user_address)
         public
-        onlyRole(roles[5])
+        onlyRole(Role.Admin)
     {
         address shop_address = asks_for_up[_user_address];
         sellers[_user_address] = Seller(
@@ -102,13 +113,13 @@ contract Accounts {
             shops[shop_address].city,
             shop_address
         );
-        role_per_address[_user_address] = roles[3];
+        role_per_address[_user_address] = Role.Seller;
         shops[shop_address].shop_sellers.push(_user_address);
         // delete customers[_user_address];
         delete asks_for_up[_user_address];
     }
 
-    function down_role(address _user_address) public onlyRole(roles[5]) {
+    function down_role(address _user_address) public onlyRole(Role.Admin) {
         customers[_user_address] = Customer(
             sellers[_user_address].login,
             sellers[_user_address].name
@@ -122,7 +133,7 @@ contract Accounts {
                 break;
             } 
         }
-        role_per_address[_user_address] = roles[4];
+        role_per_address[_user_address] = Role.Customer;
         delete sellers[_user_address];
         delete asks_for_down[_user_address];
     }
@@ -131,13 +142,14 @@ contract Accounts {
         address _address,
         string memory _name,
         string memory _city
-    ) public onlyRole(roles[5]) {
+    ) public onlyRole(Role.Admin) {
         Shop memory shop;
         shop.name = _name;
         shop.city = _city;
         shop.rate = 0;
+        shop.using_reviews = 0;
         shops[_address] = shop;
-        role_per_address[_address] = roles[1];
+        role_per_address[_address] = Role.Shop;
     }
 
     function add_customer(
@@ -147,7 +159,7 @@ contract Accounts {
         string memory _password
     ) public {
         customers[_new_address] = Customer(_login, _name);
-        role_per_address[_new_address] = roles[4];
+        role_per_address[_new_address] = Role.Customer;
         auth_data[_login] = keccak256(abi.encode(_password));
     }
 
@@ -156,13 +168,13 @@ contract Accounts {
         string memory _login,
         string memory _name,
         string memory _password
-    ) public onlyRole(roles[5]) {
+    ) public onlyRole(Role.Admin) {
         admins[_new_address] = Admin(_login, _name);
-        role_per_address[_new_address] = roles[5];
+        role_per_address[_new_address] = Role.Admin;
         auth_data[_login] = keccak256(abi.encode(_password));
     }
 
-    function remove_shop(address _shop_address) public onlyRole(roles[5]) {
+    function remove_shop(address _shop_address) public onlyRole(Role.Admin) {
         // Shop memory removing_shop = shops[_shop_address];
         for (uint24 i = 0; i < shops[_shop_address].shop_sellers.length; i++) {
             down_role(shops[_shop_address].shop_sellers[i]);
@@ -171,11 +183,11 @@ contract Accounts {
         delete shops[_shop_address];
     }
 
-    function ask_for_up(address _shop_address) public onlyRole(roles[4]) {
+    function ask_for_up(address _shop_address) public onlyRole(Role.Customer) {
         asks_for_up[msg.sender] = _shop_address;
     }
 
-    function ask_for_down() public onlyRole(roles[3]) {
+    function ask_for_down() public onlyRole(Role.Seller) {
         asks_for_down[msg.sender] = "down";
     }
 }
