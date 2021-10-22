@@ -1,0 +1,21 @@
+.address-element {
+    margin: 5pt;
+}
+
+.accounts-list {
+    margin: 5pt;
+    padding: 5pt;
+}
+
+.switch-account {
+    margin: 5pt;
+}
+
+.login-form {
+    margin: 3%;
+}
+
+.register-link {
+    font-size: medium;
+    margin-top: 20%;
+}

@@ -1,0 +1,25 @@
+{{!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, options);
+        var instance = M.FormSelect.getInstance(elem);
+
+        var selected = instance.getSelectedValues();
+    });
+</script> --}}
+<form action="/switch" method="post">
+    <div class="accoutns-list">
+        {{#if accounts.length}}
+        <label>Select account</label>
+        <select class="browser-default" name="address" id="address">
+            <option value="" disabled selected>Choose account</option>
+            {{#each accounts}}
+            <option name="address" value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+        <button class="btn waves-effect waves-light switch-account" type="submit" name="action">Submit</button>
+        {{else}}
+        <h2>No accounts detected</h2>
+        {{/if}}
+    </div>
+</form>

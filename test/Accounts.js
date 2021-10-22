@@ -25,7 +25,7 @@ contract("Accounts", (accounts) => {
         // role = await contractInstance.role_per_address.call(bob)
         customer_data = await contractInstance.customers.call(bob)
         // password = await contractInstance.auth_data.call('bob')
-
+        // console.log(password)
         // assert.equal(role, 'Customer')
         // console.log(role)
         assert.equal(customer_data['login'], 'bob')

@@ -1,5 +1,6 @@
-const ReviewBook = artifacts.require("ReviewBook");
+// const ReviewBook = artifacts.require("ReviewBook")
+const Accounts = artifacts.require("Accounts")
 
 module.exports = function (deployer) {
-  deployer.deploy(ReviewBook);
+  deployer.deploy(Accounts);
 };
