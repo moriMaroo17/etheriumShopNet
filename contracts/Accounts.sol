@@ -59,9 +59,8 @@ contract Accounts {
     }
 
     mapping(address => Role) public role_per_address;
-    mapping(string => bytes32) public auth_data;
+    mapping(string => bytes32) private auth_data;
     mapping(string => address) public login_per_address;
-    mapping(address => bool) public is_logged_in;
 
     mapping(address => address) public asks_for_up;
     mapping(address => string) public asks_for_down;
@@ -76,7 +75,7 @@ contract Accounts {
     constructor() {
         admins[msg.sender] = Admin('max', 'max');
         customers[msg.sender] = Customer('max', 'max');
-        auth_data['max'] = '1234';
+        auth_data['max'] = keccak256(abi.encode('1234'));
         role_per_address[msg.sender] = Role.Admin;
         login_per_address['max'] = msg.sender;
     }
@@ -106,24 +105,8 @@ contract Accounts {
         }
     }
 
-    function logout(address _user_address) external returns (bool) {
-        if (msg.sender == _user_address) {
-            is_logged_in[_user_address] = false;
-            return true;
-        } else {
-            return false;
-        }
-        
-    }
-
-    function login(string memory _login, string memory _password) external returns (bool) {
-        address user_address = login_per_address[_login];
-        if (auth_data[_login] != keccak256(abi.encode(_password)) || is_logged_in[user_address] || false && msg.sender == user_address) {
-            return false;
-        } else {
-            is_logged_in[user_address] = true;
-            return true;
-        }
+    function check_auth_data(string memory _login, string memory _password) external view returns (bool) {
+        return (auth_data[_login] == keccak256(abi.encode(_password)) && msg.sender == login_per_address[_login]);
     }
 
     function up_role(address _user_address)

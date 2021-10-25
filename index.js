@@ -9,6 +9,7 @@ const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-ac
 
 const truffle_connect = require('./connection/app.js')
 const bodyParser = require('body-parser')
+const { info } = require('console')
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -60,6 +61,7 @@ app.get('/switch', (req, res) => {
 app.post('/switch', (req, res) => {
     const {address} = req.body
     console.log(`Switche to address ${address}`)
+    logged_in = false
     current_account = address
 })
 
@@ -69,34 +71,38 @@ app.get('/login', (req, res) => {
     })
 })
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const {login, password} = req.body
-    console.log(login, password)
-    truffle_connect.login(login, password, current_account, (result) => {
-        if (result === true) {
-            logged_in = true
-            console.log('Success login')
-        } else {
-            console.log('Something going wrong')
-        }
-    })
+    // console.log(login, password, current_account)
+    if (current_account == undefined) {
+        console.log('Please, select account')
+        return
+    }
+    try {
+        truffle_connect.checkAuthData(login, password, current_account, (result) => {
+            console.log(result)
+            if (result === true) {
+                logged_in = true
+                console.log('Success login')
+            } else {
+                console.log('Something going wrong')
+            }
+        }) 
+    } catch (error) {
+        console.log(error)
+    }
+    
 })
 
 app.get('/account', (req, res) => {
-    
+    truffle_connect.account(current_account, (info) => {
+        console.log(info)
+    })
 })
 
 app.post('/logout', (req, res) => {
     if (current_account !== undefined && logged_in) {
-        truffle_connect.logout(current_account, {from: current_account}, (result) => {
-            if (result === true) {
-                current_account = undefined
-                logged_in = false
-                console.log('Success logout')
-            } else {
-                console.log('Something going wrong')
-            }
-        })
+        logged_in = false
     }
 })
 

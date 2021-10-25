@@ -42,45 +42,29 @@ module.exports = {
         })
     },
 
-    logout: function (address, sender, callback) {
+    checkAuthData: function (login, password, sender, callback) {
         var self = this;
 
         Accounts.setProvider(self.web3.currentProvider)
         
         Accounts.deployed().then(async function (instance) {
-            success = await instance.logout(address, {from: sender})
-            return success
-        }).then(function(success) {
-            callback(success)
-        })
+            info = await instance.check_auth_data(login, password, {from: sender})
+            return info
+        }).then(function(info) {
+            callback(info)
+        }) 
     },
 
-    login: function (login, password, sender, callback) {
+    account: function(login, password, callback) {
         var self = this;
 
         Accounts.setProvider(self.web3.currentProvider)
         
         Accounts.deployed().then(async function (instance) {
-            success = await instance.login(login, password, {from: sender})
-            return success
-        }).then(function(success) {
-            callback(success)
+            info = await instance.get_auth_data(login, password)
+            return info
+        }).then(function(info) {
+            callback(info)
         })
-        // address = Accounts.login_per_address.call(login)
-        // role = Accounts.role_per_address.call(address)
-        // callback(address, role)
-    },
-
-    account: function(address, callback) {
-        var self = this;
-
-        Accounts.setProvider(self.web3.currentProvider)
-        
-        // Accounts.deployed().then(async function (instance) {
-        //     success = await instance.(login, password, {from: sender})
-        //     return success
-        // }).then(function(success) {
-        //     callback(success)
-        // })
     }
 }
